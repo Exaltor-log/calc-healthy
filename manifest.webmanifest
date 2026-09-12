@@ -1,13 +1,13 @@
 {
-  "name": "Defisit Kalori",
-  "short_name": "Kalori",
-  "description": "Catat makanan dan pantau defisit kalori harian",
+  "name": "SnapEat",
+  "short_name": "SnapEat",
+  "description": "Foto makananmu, catat kalori dan olahraga, pantau defisit harian",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0F2018",
-  "theme_color": "#0F2018",
+  "background_color": "#F4F7EE",
+  "theme_color": "#F4F7EE",
   "lang": "id",
   "icons": [
     { "src": "ikon-192.png", "sizes": "192x192", "type": "image/png" },

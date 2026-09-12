@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0F2018">
+<meta name="theme-color" content="#F4F7EE">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="ikon-192.png">
-<title>Defisit Kalori</title>
+<title>SnapEat</title>
 <style>
   :root{
-    --bg:#0F2018; --card:#18342A; --line:#2C5143;
-    --text:#E8F0E6; --muted:#9FB6A8;
-    --kunyit:#F0B429; --lebih:#E4573D; --radius:14px;
+    --bg:#F4F7EE; --card:#FFFFFF; --line:#DCE5D0; --line2:#EDF1E5;
+    --text:#17322A; --muted:#63786B;
+    --hijau:#1F7A46; --kuning:#F2A93B; --lebih:#D14A32;
+    --radius:16px;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -23,88 +24,92 @@
   }
   .wrap{max-width:520px;margin:0 auto}
 
-  header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:22px}
-  h1{font-size:20px;font-weight:700;letter-spacing:-0.01em;margin:0}
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
+  h1{font-size:21px;font-weight:800;letter-spacing:-0.02em;margin:0}
+  h1 span{color:var(--hijau)}
   .tanggal{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
 
-  .hero{display:flex;flex-direction:column;align-items:center}
-  .ring{width:216px;height:216px;display:block}
-  .ring-bg{fill:none;stroke:var(--line);stroke-width:14}
-  .ring-fg{fill:none;stroke:var(--kunyit);stroke-width:14;stroke-linecap:round;
+  .hero{display:flex;flex-direction:column;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px 12px 16px;margin-bottom:14px}
+  .ring{width:210px;height:210px;display:block}
+  .ring-bg{fill:none;stroke:var(--line2);stroke-width:15}
+  .ring-fg{fill:none;stroke:var(--kuning);stroke-width:15;stroke-linecap:round;
     transform:rotate(-90deg);transform-origin:50% 50%;
     transition:stroke-dashoffset .45s ease, stroke .25s ease}
   .ring-tengah{text-anchor:middle}
-  .angka{font-size:46px;font-weight:700;fill:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+  .angka{font-size:46px;font-weight:800;fill:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
   .satuan{font-size:13px;fill:var(--muted);font-weight:500}
-  .status{margin-top:-6px;font-size:14px;color:var(--muted);text-align:center;min-height:22px}
+  .status{margin:-2px 0 0;font-size:14px;color:var(--muted);text-align:center;min-height:22px}
   .status.lebih{color:var(--lebih)}
 
-  .stat{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
-    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin:20px 0 26px}
-  .stat div{background:var(--card);padding:12px 8px;text-align:center}
-  .stat b{display:block;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:26px}
+  .stat div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 10px}
+  .stat b{display:block;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.25}
   .stat span{font-size:12px;color:var(--muted)}
+  .stat .hijau{color:var(--hijau)}
 
-  h2{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 10px}
+  h2{font-size:13px;font-weight:700;color:var(--muted);margin:0 0 10px;text-transform:uppercase;letter-spacing:0.04em}
 
   input,select,button{font-family:inherit;font-size:16px}
   input,select{background:var(--card);border:1px solid var(--line);color:var(--text);
-    border-radius:10px;padding:11px 12px;width:100%;min-width:0}
-  input::placeholder{color:#6F8A7B}
-  input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--kunyit);outline-offset:2px}
+    border-radius:11px;padding:11px 12px;width:100%;min-width:0}
+  input::placeholder{color:#9AAB98}
+  input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--hijau);outline-offset:2px}
 
   .baris{display:flex;gap:8px;margin-bottom:8px}
-  .baris input.kecil{width:96px;flex:none;font-variant-numeric:tabular-nums}
-  .utama{background:var(--kunyit);color:#231903;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
-  .utama:active{filter:brightness(.9)}
-  .utama[disabled]{opacity:.45;cursor:default}
-  .kedua{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 16px;cursor:pointer}
-  .kedua:active{background:var(--card)}
-  .kedua[disabled]{opacity:.45;cursor:default}
+  .baris input.kecil{width:100px;flex:none;font-variant-numeric:tabular-nums}
+  .utama{background:var(--hijau);color:#fff;border:0;border-radius:11px;padding:12px 16px;font-weight:700;cursor:pointer}
+  .utama:active{filter:brightness(.92)}
+  .utama[disabled]{opacity:.5;cursor:default}
+  .kedua{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:12px 16px;cursor:pointer;font-weight:600}
+  .kedua:active{background:var(--line2)}
+  .kedua[disabled]{opacity:.5;cursor:default}
 
   .foto{display:flex;gap:8px;margin-bottom:8px}
-  .foto button{flex:1;background:transparent;border:1px dashed var(--line);color:var(--text);
-    border-radius:12px;padding:14px 10px;cursor:pointer;font-size:14px}
-  .foto button:active{background:var(--card)}
+  .foto button{flex:1;background:var(--card);border:1px dashed var(--line);color:var(--text);
+    border-radius:13px;padding:15px 10px;cursor:pointer;font-size:14px;font-weight:600}
+  .foto button:active{background:var(--line2)}
   .pratinjau{display:none;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);
     border-radius:var(--radius);padding:12px;margin-bottom:14px}
   .pratinjau.tampil{display:flex}
-  .pratinjau img{width:64px;height:64px;object-fit:cover;border-radius:9px;flex:none}
+  .pratinjau img{width:62px;height:62px;object-fit:cover;border-radius:10px;flex:none}
   .pratinjau .pesan{flex:1;font-size:13.5px;color:var(--muted)}
   .pratinjau .pesan.galat{color:var(--lebih)}
 
-  .hasil{border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:20px;display:none}
+  .hasil{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px;margin-bottom:20px;display:none}
   .hasil.tampil{display:block}
-  .item{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px}
-  .item:last-of-type{border-bottom:0;margin-bottom:6px;padding-bottom:0}
+  .item{border-bottom:1px solid var(--line2);padding-bottom:12px;margin-bottom:12px}
+  .item:last-of-type{border-bottom:0;margin-bottom:8px;padding-bottom:0}
   .item .atas{display:flex;gap:8px;align-items:center;margin-bottom:8px}
   .item .atas input{flex:1}
   .item .bawah{display:flex;gap:8px;align-items:center}
-  .porsi{display:flex;align-items:center;gap:0;flex:none}
-  .porsi button{width:38px;height:42px;background:transparent;border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:18px}
-  .porsi button:first-child{border-radius:10px 0 0 10px}
-  .porsi button:last-child{border-radius:0 10px 10px 0}
+  .porsi{display:flex;flex:none}
+  .porsi button{width:38px;height:43px;background:var(--card);border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:18px}
+  .porsi button:first-child{border-radius:11px 0 0 11px}
+  .porsi button:last-child{border-radius:0 11px 11px 0}
   .porsi input{width:62px;border-radius:0;text-align:center;padding:11px 4px;font-variant-numeric:tabular-nums}
   .item .gram{flex:1;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
   .item .kkalBox{width:96px;flex:none;font-variant-numeric:tabular-nums}
 
   .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:26px}
-  .chip{background:transparent;border:1px solid var(--line);color:var(--text);
-    border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer;max-width:100%;
+  .chip{background:var(--card);border:1px solid var(--line);color:var(--text);
+    border-radius:999px;padding:8px 13px;font-size:13px;cursor:pointer;max-width:100%;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .chip b{color:var(--kunyit);font-weight:600;font-variant-numeric:tabular-nums}
-  .chip:active{background:var(--card)}
+  .chip b{color:var(--hijau);font-weight:700;font-variant-numeric:tabular-nums}
+  .chip:active{background:var(--line2)}
 
-  ul{list-style:none;margin:0 0 26px;padding:0}
-  li{display:flex;align-items:center;gap:10px;padding:12px 2px;border-bottom:1px solid var(--line)}
+  ul{list-style:none;margin:0 0 26px;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  li{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--line2)}
+  li:last-child{border-bottom:0}
   li .nama{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  li .kkal{font-variant-numeric:tabular-nums;font-weight:600}
-  .hapus{background:none;border:0;color:var(--muted);font-size:20px;line-height:1;padding:4px 6px;cursor:pointer;flex:none}
+  li .kkal{font-variant-numeric:tabular-nums;font-weight:700}
+  li .kkal.bakar{color:var(--hijau)}
+  .hapus{background:none;border:0;color:#A7B6A4;font-size:20px;line-height:1;padding:4px 6px;cursor:pointer;flex:none}
   .hapus:active{color:var(--lebih)}
-  .kosong{color:var(--muted);font-size:14px;padding:14px 2px;border-bottom:1px solid var(--line)}
+  .kosong{color:var(--muted);font-size:14px}
 
-  details{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);padding:0 14px;margin-bottom:14px}
-  summary{cursor:pointer;padding:14px 0;font-weight:600;font-size:15px;list-style:none}
+  details{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);padding:0 14px;margin-bottom:12px}
+  summary{cursor:pointer;padding:14px 0;font-weight:700;font-size:15px;list-style:none}
   summary::-webkit-details-marker{display:none}
   summary::after{content:"+";float:right;color:var(--muted);font-weight:400}
   details[open] summary::after{content:"-"}
@@ -112,12 +117,13 @@
   .form label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
   .lebar{grid-column:1 / -1}
   .bantuan{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0 0 16px}
-  .bantuan a{color:var(--kunyit)}
+  .bantuan a{color:var(--hijau)}
   .pesanKecil{font-size:12.5px;color:var(--muted);min-height:18px;margin:0 0 18px}
   .pesanKecil.galat{color:var(--lebih)}
+  .nota{font-size:12.5px;color:var(--muted);margin:-2px 0 18px;line-height:1.5}
 
   .catatan{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:22px}
-  .peringatan{border-left:3px solid var(--kunyit);padding-left:12px;margin:18px 0;font-size:13px}
+  .peringatan{border-left:3px solid var(--kuning);padding-left:12px;margin:18px 0;font-size:13px}
   .sembunyi{display:none}
   @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
@@ -126,7 +132,7 @@
 <div class="wrap">
 
   <header>
-    <h1>Defisit kalori</h1>
+    <h1>Snap<span>Eat</span></h1>
     <span class="tanggal" id="tanggal"></span>
   </header>
 
@@ -144,9 +150,10 @@
   </div>
 
   <div class="stat">
-    <div><b id="statTarget">0</b><span>Target harian</span></div>
-    <div><b id="statMasuk">0</b><span>Sudah masuk</span></div>
-    <div><b id="statDefisit">0</b><span>Defisit</span></div>
+    <div><b id="statTarget">0</b><span>Target hari ini</span></div>
+    <div><b id="statMasuk">0</b><span>Kalori masuk</span></div>
+    <div><b class="hijau" id="statGerak">0</b><span>Dibakar olahraga</span></div>
+    <div><b id="statDefisit">0</b><span>Target defisit</span></div>
   </div>
 
   <h2>Hitung dari foto</h2>
@@ -169,7 +176,7 @@
     <button class="utama" id="btnSimpanHasil" style="width:100%">Masukkan ke catatan</button>
   </div>
 
-  <h2>Tambah sendiri</h2>
+  <h2>Tambah makanan sendiri</h2>
   <div class="baris">
     <input id="nama" type="text" placeholder="Makanan apa pun, misal: spaghetti carbonara" autocomplete="off">
     <input id="kkal" class="kecil" type="number" inputmode="numeric" placeholder="kkal" min="0">
@@ -183,7 +190,22 @@
   <h2 id="judulChips">Sering kamu catat</h2>
   <div class="chips" id="chips"></div>
 
-  <h2>Makanan hari ini</h2>
+  <h2>Olahraga dan aktivitas</h2>
+  <div class="baris">
+    <select id="jenisGerak" aria-label="Jenis olahraga"></select>
+  </div>
+  <div class="baris">
+    <input id="menitGerak" type="number" inputmode="numeric" min="1" placeholder="menit" class="kecil" style="flex:1;width:auto">
+    <button class="utama" id="btnGerak" style="flex:1">Tambah olahraga</button>
+  </div>
+  <p class="nota" id="taksirGerak"></p>
+  <div class="baris">
+    <input id="namaGerak" type="text" placeholder="Olahraga lain, misal: panjat tebing 40 menit" autocomplete="off">
+    <button class="kedua" id="btnCariGerak" style="flex:none">Cari</button>
+  </div>
+  <p class="pesanKecil" id="pesanGerak"></p>
+
+  <h2>Catatan hari ini</h2>
   <ul id="daftar"></ul>
 
   <details id="panelProfil">
@@ -206,14 +228,17 @@
         <input id="tinggi" type="number" inputmode="numeric" min="120" max="220">
       </div>
       <div class="lebar">
-        <label for="aktivitas">Aktivitas harian</label>
+        <label for="aktivitas">Aktivitas harian di luar olahraga</label>
         <select id="aktivitas">
           <option value="1.2">Jarang gerak, kerja duduk</option>
-          <option value="1.375">Olahraga ringan 1 sampai 3 hari seminggu</option>
-          <option value="1.55">Olahraga sedang 3 sampai 5 hari seminggu</option>
-          <option value="1.725">Aktif berat, banyak berdiri atau angkat beban</option>
+          <option value="1.375">Cukup banyak berjalan</option>
+          <option value="1.55">Banyak berdiri dan berpindah</option>
+          <option value="1.725">Kerja fisik berat seharian</option>
         </select>
       </div>
+      <p class="bantuan lebar" style="margin:0">
+        Kalau olahraga kamu catat di bagian atas, pilih tingkat yang lebih rendah di sini. Kalau tidak, olahraganya terhitung dua kali.
+      </p>
       <div class="lebar">
         <label for="defisit">Kecepatan turun berat</label>
         <select id="defisit">
@@ -258,8 +283,8 @@
   <p class="peringatan" id="peringatan" hidden></p>
 
   <p class="catatan">
-    Kebutuhan kalori dihitung dengan rumus Mifflin St Jeor, dan semua angka kalori di sini adalah perkiraan, bukan hasil timbang atau uji lab.
-    Taksiran dari foto paling sering meleset di bagian porsi dan minyak, jadi pakai pengali porsi kalau isi piringmu lebih banyak atau lebih sedikit dari yang tertulis.
+    Kebutuhan kalori dihitung dengan rumus Mifflin St Jeor, dan kalori olahraga memakai nilai MET standar yang disesuaikan dengan beratmu. Semua angka di sini perkiraan, bukan hasil timbang atau uji lab.
+    Taksiran dari foto paling sering meleset di bagian porsi dan minyak, jadi pakai pengali porsi kalau isi piringmu berbeda dari yang tertulis.
     Aplikasi ini membatasi defisit maksimal 500 kkal per hari dan tidak menurunkan target di bawah batas aman.
     Untuk kondisi kesehatan tertentu atau target yang lebih agresif, bicarakan dulu dengan dokter atau ahli gizi.
   </p>
@@ -276,6 +301,14 @@
     ["Teh manis 1 gelas",90],["Air putih",0]
   ];
 
+  // Nilai MET standar, dipakai bersama berat badan untuk menaksir kalori terbakar.
+  var gerakan = [
+    ["Jalan santai",3.0],["Jalan cepat",4.8],["Lari ringan",8.0],["Lari cepat",11.0],
+    ["Sepeda santai",5.8],["Sepeda cepat",10.0],["Renang",7.0],["Angkat beban",5.0],
+    ["Futsal atau sepak bola",8.0],["Badminton",5.5],["Naik tangga",8.0],
+    ["Senam atau aerobik",6.5],["Beres beres rumah",3.3],["Kerja fisik sedang",4.0]
+  ];
+
   var memori = {};
   var simpan = {
     get:function(k){ try{ var v=localStorage.getItem(k); return v===null?memori[k]:v; }catch(e){ return memori[k]; } },
@@ -283,7 +316,7 @@
   };
 
   var profilDefault = { jk:"pria", usia:25, berat:70, tinggi:170, aktivitas:1.375, defisit:250 };
-  var profil, items, hariIni, sering = {}, hasilFoto = [];
+  var profil, items, gerak, hariIni, sering = {}, hasilFoto = [];
   var kunci = simpan.get("dk_key") || "";
   var model = simpan.get("dk_model") || "";
   var $ = function(id){ return document.getElementById(id); };
@@ -294,8 +327,11 @@
     hariIni = tanggalKunci();
     try{ profil = JSON.parse(simpan.get("dk_profil")) || profilDefault; }catch(e){ profil = profilDefault; }
     var adaProfil = !!simpan.get("dk_profil");
-    items = [];
-    try{ var log=JSON.parse(simpan.get("dk_log")); if(log && log.tanggal===hariIni) items=log.items||[]; }catch(e){}
+    items=[]; gerak=[];
+    try{
+      var log=JSON.parse(simpan.get("dk_log"));
+      if(log && log.tanggal===hariIni){ items=log.items||[]; gerak=log.gerak||[]; }
+    }catch(e){}
     try{ sering = JSON.parse(simpan.get("dk_sering")) || {}; }catch(e){ sering = {}; }
     $("jk").value=profil.jk; $("usia").value=profil.usia; $("berat").value=profil.berat;
     $("tinggi").value=profil.tinggi; $("aktivitas").value=profil.aktivitas; $("defisit").value=profil.defisit;
@@ -306,7 +342,7 @@
 
   function simpanSemua(){
     simpan.set("dk_profil", JSON.stringify(profil));
-    simpan.set("dk_log", JSON.stringify({ tanggal:hariIni, items:items }));
+    simpan.set("dk_log", JSON.stringify({ tanggal:hariIni, items:items, gerak:gerak }));
     simpan.set("dk_sering", JSON.stringify(sering));
   }
 
@@ -322,14 +358,19 @@
     var tdee = bmr*profil.aktivitas;
     var potong = Math.min(profil.defisit,500);
     var lantai = profil.jk==="pria"?1500:1200;
-    var target = Math.round(tdee-potong), dibatasi=false;
-    if(target<lantai){ target=lantai; dibatasi=true; }
-    return { target:target, potong:Math.round(tdee)-target, dibatasi:dibatasi, lantai:lantai };
+    var dasar = Math.round(tdee-potong), dibatasi=false;
+    if(dasar<lantai){ dasar=lantai; dibatasi=true; }
+    var terbakar = gerak.reduce(function(a,b){ return a+b.kkal; },0);
+    return { dasar:dasar, terbakar:terbakar, target:dasar+terbakar,
+      potong:Math.round(tdee)-dasar, dibatasi:dibatasi, lantai:lantai };
+  }
+
+  function metKkal(met, menit){
+    return Math.round(met * 3.5 * profil.berat / 200 * menit);
   }
 
   function gambarChips(){
-    var kunciSering = Object.keys(sering);
-    var daftar = kunciSering.map(function(n){ return { nama:n, kkal:sering[n].kkal, c:sering[n].c||1 }; })
+    var daftar = Object.keys(sering).map(function(n){ return { nama:n, kkal:sering[n].kkal, c:sering[n].c||1 }; })
       .sort(function(a,b){ return b.c-a.c; }).slice(0,16);
     var pakaiBawaan = daftar.length===0;
     if(pakaiBawaan) daftar = bawaan.map(function(f){ return { nama:f[0], kkal:f[1] }; });
@@ -349,18 +390,21 @@
     var masuk=items.reduce(function(a,b){ return a+b.kkal; },0);
     var sisa=h.target-masuk, lebih=sisa<0;
 
-    $("statTarget").textContent=h.target; $("statMasuk").textContent=masuk; $("statDefisit").textContent=h.potong;
+    $("statTarget").textContent=h.target;
+    $("statMasuk").textContent=masuk;
+    $("statGerak").textContent=h.terbakar;
+    $("statDefisit").textContent=h.potong;
     $("sisaAngka").textContent=Math.abs(sisa);
     $("sisaLabel").textContent = lebih?"kkal kelebihan":"kkal tersisa";
 
     var keliling=578, rasio=h.target>0?Math.min(masuk/h.target,1):0;
     var ring=$("ringFg");
     ring.setAttribute("stroke-dashoffset", keliling-(keliling*rasio));
-    ring.style.stroke = lebih?"var(--lebih)":"var(--kunyit)";
+    ring.style.stroke = lebih?"var(--lebih)":"var(--kuning)";
 
     var st=$("status");
     st.className="status"+(lebih?" lebih":"");
-    if(items.length===0) st.textContent="Belum ada makanan yang dicatat hari ini.";
+    if(items.length===0 && gerak.length===0) st.textContent="Belum ada catatan hari ini.";
     else if(lebih) st.textContent="Sudah lewat target. Defisit hari ini jadi "+Math.max(h.potong-Math.abs(sisa),0)+" kkal.";
     else st.textContent="Kalau berhenti di sini, defisit hari ini "+(h.potong+sisa)+" kkal.";
 
@@ -369,26 +413,29 @@
     else p.hidden=true;
 
     var ul=$("daftar"); ul.innerHTML="";
-    if(items.length===0){
+    if(items.length===0 && gerak.length===0){
       var kosong=document.createElement("li");
       kosong.className="kosong";
       kosong.textContent="Foto makananmu, atau ketik namanya lalu tekan Cari kalorinya.";
       ul.appendChild(kosong);
-    } else {
-      items.forEach(function(it,i){
-        var li=document.createElement("li");
-        var nama=document.createElement("span"); nama.className="nama"; nama.textContent=it.nama;
-        var kkal=document.createElement("span"); kkal.className="kkal"; kkal.textContent=it.kkal+" kkal";
-        var btn=document.createElement("button");
-        btn.className="hapus"; btn.type="button";
-        btn.setAttribute("aria-label","Hapus "+it.nama);
-        btn.textContent="\u00d7";
-        btn.onclick=function(){ items.splice(i,1); simpanSemua(); render(); };
-        li.appendChild(nama); li.appendChild(kkal); li.appendChild(btn);
-        ul.appendChild(li);
-      });
     }
+    items.forEach(function(it,i){ ul.appendChild(barisDaftar(it.nama, "+"+it.kkal+" kkal", false, function(){ items.splice(i,1); simpanSemua(); render(); })); });
+    gerak.forEach(function(it,i){ ul.appendChild(barisDaftar(it.nama, "-"+it.kkal+" kkal", true, function(){ gerak.splice(i,1); simpanSemua(); render(); })); });
     gambarChips();
+    taksir();
+  }
+
+  function barisDaftar(teks, angkaTeks, bakar, hapusFn){
+    var li=document.createElement("li");
+    var nama=document.createElement("span"); nama.className="nama"; nama.textContent=teks;
+    var kkal=document.createElement("span"); kkal.className="kkal"+(bakar?" bakar":""); kkal.textContent=angkaTeks;
+    var btn=document.createElement("button");
+    btn.className="hapus"; btn.type="button";
+    btn.setAttribute("aria-label","Hapus "+teks);
+    btn.textContent="\u00d7";
+    btn.onclick=hapusFn;
+    li.appendChild(nama); li.appendChild(kkal); li.appendChild(btn);
+    return li;
   }
 
   function tambah(nama,kkal){
@@ -397,6 +444,12 @@
     items.push({ nama:nama, kkal:kkal });
     var s=sering[nama]||{ c:0 };
     s.c=(s.c||0)+1; s.kkal=kkal; sering[nama]=s;
+    simpanSemua(); render();
+  }
+
+  function tambahGerak(nama,kkal){
+    if(!nama || !isFinite(kkal) || kkal<=0) return;
+    gerak.push({ nama:nama, kkal:Math.round(kkal) });
     simpanSemua(); render();
   }
 
@@ -417,25 +470,18 @@
     var maksCoba=4, tunggu=1500, r=null, galatJaringan=null;
 
     for(var coba=1; coba<=maksCoba; coba++){
-      try{
-        r=await fetch(alamat,{ method:"POST", headers:{"Content-Type":"application/json"}, body:badan });
-      }catch(e){
-        galatJaringan=e; r=null;
-      }
-
+      try{ r=await fetch(alamat,{ method:"POST", headers:{"Content-Type":"application/json"}, body:badan }); }
+      catch(e){ galatJaringan=e; r=null; }
       if(r && r.ok) break;
-
       var kode = r ? r.status : 0;
       var bisaUlang = (kode===503 || kode===500 || kode===502 || kode===504 || kode===0);
       if(!bisaUlang) break;
-
       if(coba===maksCoba){
         if(kode===0) throw new Error("Tidak bisa menghubungi Google. Cek koneksi internet.");
-        throw new Error("Server Google sedang penuh (kode "+kode+"). Ini dari sisi mereka, bukan datamu. Coba lagi beberapa menit lagi, atau pilih model lain di pengaturan.");
+        throw new Error("Server Google sedang penuh (kode "+kode+"). Coba lagi beberapa menit lagi, atau pilih model lain di pengaturan.");
       }
       if(kabar) kabar("Server Google sedang penuh. Mencoba lagi, percobaan "+(coba+1)+" dari "+maksCoba+"...");
-      await jeda(tunggu);
-      tunggu = tunggu*2;
+      await jeda(tunggu); tunggu=tunggu*2;
     }
 
     if(!r) throw (galatJaringan || new Error("Permintaan gagal terkirim."));
@@ -525,7 +571,6 @@
     var wadah=$("hasilItem"); wadah.innerHTML="";
     hasilFoto.forEach(function(it,i){
       var blok=document.createElement("div"); blok.className="item";
-
       var atas=document.createElement("div"); atas.className="atas";
       var n=document.createElement("input"); n.type="text"; n.value=it.nama;
       n.oninput=function(){ hasilFoto[i].nama=n.value; };
@@ -587,11 +632,8 @@
     $(id).addEventListener("change",function(e){ bacaFoto(e.target.files[0]); e.target.value=""; });
   });
 
-  // Cari kalori dari nama makanan
-
   $("btnCari").onclick=async function(){
-    var n=$("nama").value.trim();
-    var p=$("pesanCari");
+    var n=$("nama").value.trim(), p=$("pesanCari");
     if(!n){ $("nama").focus(); return; }
     if(!siapAI()) return;
     this.disabled=true; p.className="pesanKecil"; p.textContent="Mencari perkiraan kalori...";
@@ -607,9 +649,8 @@
       $("nama").value = d.nama ? String(d.nama) : n;
       $("kkal").value = kk;
       p.textContent = "Perkiraan "+kk+" kkal"+(d.gram?" untuk sekitar "+Math.round(d.gram)+" g":"")+". Tekan Tambah kalau cocok.";
-    }catch(e){
-      p.className="pesanKecil galat"; p.textContent=e.message;
-    }finally{ this.disabled=false; }
+    }catch(e){ p.className="pesanKecil galat"; p.textContent=e.message; }
+    finally{ this.disabled=false; }
   };
 
   $("btnTambah").onclick=function(){
@@ -619,6 +660,50 @@
     n.value=""; k.value=""; $("pesanCari").textContent=""; n.focus();
   };
   $("kkal").addEventListener("keydown",function(e){ if(e.key==="Enter") $("btnTambah").click(); });
+
+  // Olahraga
+
+  var selGerak=$("jenisGerak");
+  gerakan.forEach(function(g,i){
+    var o=document.createElement("option"); o.value=i; o.textContent=g[0]; selGerak.appendChild(o);
+  });
+
+  function taksir(){
+    var menit=parseFloat($("menitGerak").value);
+    var g=gerakan[parseInt(selGerak.value,10)||0];
+    if(!isFinite(menit) || menit<=0){ $("taksirGerak").textContent="Isi menitnya untuk melihat perkiraan kalori terbakar."; return; }
+    $("taksirGerak").textContent = g[0]+" "+menit+" menit dengan berat "+profil.berat+" kg, sekitar "+metKkal(g[1],menit)+" kkal terbakar.";
+  }
+  selGerak.addEventListener("change",taksir);
+  $("menitGerak").addEventListener("input",taksir);
+
+  $("btnGerak").onclick=function(){
+    var menit=parseFloat($("menitGerak").value);
+    if(!isFinite(menit) || menit<=0){ $("menitGerak").focus(); return; }
+    var g=gerakan[parseInt(selGerak.value,10)||0];
+    tambahGerak(g[0]+" "+menit+" menit", metKkal(g[1],menit));
+    $("menitGerak").value="";
+  };
+
+  $("btnCariGerak").onclick=async function(){
+    var n=$("namaGerak").value.trim(), p=$("pesanGerak");
+    if(!n){ $("namaGerak").focus(); return; }
+    if(!siapAI()) return;
+    this.disabled=true; p.className="pesanKecil"; p.textContent="Menghitung perkiraan...";
+    try{
+      var d=await kirim([{ text:
+        "Perkirakan kalori yang terbakar untuk aktivitas ini: \""+n+"\", "+
+        "oleh orang dengan berat "+profil.berat+" kg. "+
+        "Pakai nilai MET standar. Kalau durasinya tidak disebut, pakai 30 menit dan tulis di nama. "+
+        'Jawab hanya JSON: {"nama":"Panjat tebing 40 menit","kkal":380}.' }], function(m){ p.textContent=m; });
+      var kk=Math.max(0,Math.round(Number(d.kkal)||0));
+      if(!kk){ p.className="pesanKecil galat"; p.textContent="Tidak dapat perkiraan untuk aktivitas itu."; return; }
+      tambahGerak(d.nama?String(d.nama):n, kk);
+      $("namaGerak").value="";
+      p.textContent="Ditambahkan, sekitar "+kk+" kkal terbakar.";
+    }catch(e){ p.className="pesanKecil galat"; p.textContent=e.message; }
+    finally{ this.disabled=false; }
+  };
 
   // Pengaturan
 
@@ -663,7 +748,7 @@
   });
 
   $("btnHapusRiwayat").onclick=function(){ sering={}; simpanSemua(); render(); };
-  $("btnHapusHari").onclick=function(){ items=[]; simpanSemua(); render(); };
+  $("btnHapusHari").onclick=function(){ items=[]; gerak=[]; simpanSemua(); render(); };
 
   ["jk","usia","berat","tinggi","aktivitas","defisit"].forEach(function(id){
     $(id).addEventListener("change",function(){ bacaProfil(); simpanSemua(); render(); });
@@ -677,9 +762,7 @@
 </script>
 <script>
 if ("serviceWorker" in navigator && location.protocol === "https:") {
-  window.addEventListener("load", function(){
-    navigator.serviceWorker.register("sw.js").catch(function(){});
-  });
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
 }
 </script>
 </body>
