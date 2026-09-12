@@ -419,7 +419,7 @@
         </p>
         <p class="bantuan">
           <b>Pesan kesalahan yang mungkin muncul.</b> Kode 503 berarti server Google sedang penuh, aplikasi akan mencoba
-          ulang sendiri. Kode 429 berarti kuota gratis harian habis, tunggu besok. Kode 400 atau 403 berarti API key salah
+          ulang sendiri. Kalau kuota satu model habis, aplikasi otomatis pindah ke model berikutnya di daftar dan memberi tahu kamu, karena jatah dihitung terpisah per model. Kuota Google direset tiap jam 2 siang WIB. Kode 400 atau 403 berarti API key salah
           atau belum aktif. Kode 404 berarti nama model berubah, pilih ulang di Pengaturan AI.
         </p>
         <p class="bantuan">
@@ -496,6 +496,8 @@
   var profilDefault = { jk:"pria", usia:25, berat:70, tinggi:170, aktivitas:1.375, defisit:250 };
   var profil, items, gerak, hariIni, sering = {}, riwayat = {}, hasilFoto = [];
   var kunci = simpan.get("dk_key") || "";
+  var daftarModel = [];
+  try{ daftarModel = JSON.parse(simpan.get("dk_daftar")) || []; }catch(e){ daftarModel = []; }
   var model = simpan.get("dk_model") || "";
   var $ = function(id){ return document.getElementById(id); };
 
@@ -657,8 +659,46 @@
 
   function jeda(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
 
+  function kandidatModel(){
+    var urut = daftarModel.slice();
+    if(urut.indexOf(model)<0) urut.unshift(model);
+    // mulai dari model yang sedang dipakai, lalu turun ke sisanya
+    var i = urut.indexOf(model);
+    return urut.slice(i).concat(urut.slice(0,i));
+  }
+
+  function pakaiModel(m){
+    model = m;
+    simpan.set("dk_model", m);
+    var sel=$("model");
+    if(sel && sel.querySelector('option[value="'+m+'"]')) sel.value=m;
+  }
+
   async function kirim(bagian, kabar){
-    var alamat="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(kunci);
+    var kandidat = kandidatModel().slice(0,6);
+    var galatTerakhir = null;
+
+    for(var k=0; k<kandidat.length; k++){
+      if(k>0 && kabar) kabar("Kuota "+kandidat[k-1]+" habis. Mencoba "+kandidat[k]+"...");
+      try{
+        var hasil = await kirimKe(kandidat[k], bagian, kabar);
+        if(kandidat[k]!==model){
+          pakaiModel(kandidat[k]);
+          if(kabar) kabar("Model dipindah ke "+kandidat[k]+" karena kuota sebelumnya habis.");
+        }
+        return hasil;
+      }catch(e){
+        galatTerakhir = e;
+        if(!e.habis) throw e;
+      }
+    }
+    throw new Error(kandidat.length>1
+      ? "Kuota semua model yang dicoba sudah habis. Kuota Google direset tiap jam 2 siang WIB."
+      : (galatTerakhir ? galatTerakhir.message : "Permintaan gagal."));
+  }
+
+  async function kirimKe(namaModel, bagian, kabar){
+    var alamat="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(namaModel)+":generateContent?key="+encodeURIComponent(kunci);
     var badan=JSON.stringify({ contents:[{parts:bagian}], generationConfig:{ responseMimeType:"application/json", temperature:0.2 } });
     var maksCoba=4, tunggu=1500, r=null, galatJaringan=null;
 
@@ -671,7 +711,7 @@
       if(!bisaUlang) break;
       if(coba===maksCoba){
         if(kode===0) throw new Error("Tidak bisa menghubungi Google. Cek koneksi internet.");
-        throw new Error("Server Google sedang penuh (kode "+kode+"). Coba lagi beberapa menit lagi, atau pilih model lain di pengaturan.");
+        throw new Error("Server Google sedang penuh (kode "+kode+"). Coba lagi beberapa menit lagi.");
       }
       if(kabar) kabar("Server Google sedang penuh. Mencoba lagi, percobaan "+(coba+1)+" dari "+maksCoba+"...");
       await jeda(tunggu); tunggu=tunggu*2;
@@ -679,11 +719,11 @@
 
     if(!r) throw (galatJaringan || new Error("Permintaan gagal terkirim."));
     if(!r.ok){
-      var ket="Permintaan ditolak, kode "+r.status+".";
-      if(r.status===429) ket="Kuota gratis hari ini habis. Coba lagi besok, atau pilih model flash lite di pengaturan.";
-      else if(r.status===400||r.status===403) ket="API key ditolak. Cek lagi key di pengaturan.";
-      else if(r.status===404) ket="Model tidak tersedia. Pilih model lain di pengaturan.";
-      throw new Error(ket);
+      var g;
+      if(r.status===429){ g=new Error("Kuota "+namaModel+" habis."); g.habis=true; throw g; }
+      if(r.status===404){ g=new Error("Model "+namaModel+" tidak tersedia."); g.habis=true; throw g; }
+      if(r.status===400||r.status===403) throw new Error("API key ditolak. Cek lagi key di Pengaturan AI.");
+      throw new Error("Permintaan ditolak, kode "+r.status+".");
     }
     var d=await r.json();
     var teks=((d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts)||[])
@@ -949,6 +989,7 @@
       });
       model = daftar.indexOf(model)>=0 ? model : daftar[0];
       sel.value=model; simpan.set("dk_model",model);
+      daftarModel=daftar; simpan.set("dk_daftar", JSON.stringify(daftar));
       p.textContent="Ditemukan "+daftar.length+" model. Yang dipakai sekarang: "+model+".";
       ringkasProfil();
     }catch(e){
