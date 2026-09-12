@@ -903,31 +903,58 @@
   function skorModel(nama){
     var m=nama.match(/gemini-(\d+(?:\.\d+)?)/);
     var versi=m?parseFloat(m[1]):0;
-    var stabil=/preview|exp|thinking/.test(nama)?0:1;
-    var ringan=/flash-lite/.test(nama)?0.5:0;
-    return versi*10 + stabil*3 - ringan;
+    var ringan=/flash-lite/.test(nama)?2:0;      // hemat kuota, taruh dekat atas
+    var flash=/flash/.test(nama)?1:0;
+    var stabil=/preview|exp|thinking|latest/.test(nama)?0:1;
+    return versi*10 + flash*4 + ringan + stabil*2;
+  }
+
+  async function ambilSemuaModel(){
+    var semua=[], token="", putaran=0;
+    do{
+      var alamat="https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key="+encodeURIComponent(kunci)
+        + (token ? "&pageToken="+encodeURIComponent(token) : "");
+      var r=await fetch(alamat);
+      if(!r.ok) throw new Error(r.status===400||r.status===403
+        ? "Key ditolak Google. Pastikan key disalin utuh."
+        : "Gagal memuat daftar model, kode "+r.status+".");
+      var d=await r.json();
+      semua=semua.concat(d.models||[]);
+      token=d.nextPageToken||"";
+      putaran++;
+    } while(token && putaran<10);
+    return semua;
   }
 
   async function muatModel(){
     var p=$("pesanKunci");
     p.textContent="Memuat daftar model...";
     try{
-      var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models?key="+encodeURIComponent(kunci));
-      if(!r.ok){ p.textContent="Key ditolak Google. Pastikan key disalin utuh."; return; }
-      var d=await r.json();
-      var daftar=(d.models||[]).filter(function(m){
+      var semua=await ambilSemuaModel();
+      var daftar=semua.filter(function(m){
         var n=m.name.replace("models/","");
         return (m.supportedGenerationMethods||[]).indexOf("generateContent")>=0
-          && /flash/.test(n) && !/tts|image|embedding|audio|native/.test(n);
-      }).map(function(m){ return m.name.replace("models/",""); })
-        .sort(function(a,b){ return skorModel(b)-skorModel(a); });
-      if(daftar.length===0){ p.textContent="Tidak ada model flash yang tersedia di akun ini."; return; }
+          && !/embedding|embed|aqa|tts|imagen|veo|image-generation|nano-banana/.test(n);
+      }).map(function(m){ return m.name.replace("models/",""); });
+
+      daftar = daftar.filter(function(n,i){ return daftar.indexOf(n)===i; })
+                     .sort(function(a,b){ return skorModel(b)-skorModel(a); });
+
+      if(daftar.length===0){ p.textContent="Tidak ada model yang bisa dipakai di akun ini."; return; }
       var sel=$("model"); sel.innerHTML="";
-      daftar.forEach(function(n){ var o=document.createElement("option"); o.value=n; o.textContent=n; sel.appendChild(o); });
+      daftar.forEach(function(n){
+        var o=document.createElement("option"); o.value=n;
+        o.textContent = n + (/flash-lite/.test(n) ? "  (kuota paling besar)" : "");
+        sel.appendChild(o);
+      });
       model = daftar.indexOf(model)>=0 ? model : daftar[0];
       sel.value=model; simpan.set("dk_model",model);
-      p.textContent="Siap. Model yang dipakai: "+model+".";
-    }catch(e){ p.textContent="Tidak bisa menghubungi Google. Cek koneksi internet."; }
+      p.textContent="Ditemukan "+daftar.length+" model. Yang dipakai sekarang: "+model+".";
+      ringkasProfil();
+    }catch(e){
+      p.textContent = e.message.indexOf("Key")>=0 || e.message.indexOf("model")>=0
+        ? e.message : "Tidak bisa menghubungi Google. Cek koneksi internet.";
+    }
   }
 
   $("btnKunci").onclick=function(){
