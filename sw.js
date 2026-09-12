@@ -1,6 +1,6 @@
 // Service worker: aplikasi tetap bisa dibuka tanpa internet,
-// tapi versi terbaru selalu diambil lebih dulu saat ada internet.
-var VERSI = "kalori";
+// tapi saat ada internet semua berkas diambil versi terbarunya lebih dulu.
+var VERSI = "snapeat-v2";
 var BERKAS = ["./", "./index.html", "./manifest.webmanifest", "./ikon-192.png", "./ikon-512.png", "./ikon-maskable.png"];
 
 self.addEventListener("install", function(e){
@@ -19,12 +19,6 @@ self.addEventListener("activate", function(e){
   );
 });
 
-function simpan(permintaan, jawaban){
-  var salinan = jawaban.clone();
-  caches.open(VERSI).then(function(c){ c.put(permintaan, salinan); });
-  return jawaban;
-}
-
 self.addEventListener("fetch", function(e){
   var url = new URL(e.request.url);
 
@@ -32,26 +26,19 @@ self.addEventListener("fetch", function(e){
   if (url.hostname.indexOf("googleapis.com") >= 0) return;
   if (e.request.method !== "GET" || url.origin !== self.location.origin) return;
 
-  var kodeAplikasi = e.request.mode === "navigate"
-    || /\.(html|js|webmanifest)$/.test(url.pathname);
-
-  if (kodeAplikasi) {
-    // Jaringan dulu: kalau ada internet, versi terbaru yang dipakai.
-    // Kalau tidak ada, jatuh ke salinan terakhir yang tersimpan.
-    e.respondWith(
-      fetch(e.request)
-        .then(function(r){ return r && r.ok ? simpan(e.request, r) : r; })
-        .catch(function(){
-          return caches.match(e.request).then(function(t){ return t || caches.match("./index.html"); });
-        })
-    );
-    return;
-  }
-
-  // Gambar dan berkas lain: ambil dari simpanan dulu supaya cepat.
+  // Jaringan dulu untuk semua berkas milik aplikasi, termasuk ikon.
+  // Salinan lokal hanya dipakai kalau jaringan gagal.
   e.respondWith(
-    caches.match(e.request).then(function(t){
-      return t || fetch(e.request).then(function(r){ return r && r.ok ? simpan(e.request, r) : r; });
+    fetch(e.request).then(function(r){
+      if (r && r.ok) {
+        var salinan = r.clone();
+        caches.open(VERSI).then(function(c){ c.put(e.request, salinan); });
+      }
+      return r;
+    }).catch(function(){
+      return caches.match(e.request).then(function(t){
+        return t || caches.match("./index.html");
+      });
     })
   );
 });
