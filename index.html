@@ -125,6 +125,55 @@
   .catatan{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:22px}
   .peringatan{border-left:3px solid var(--kuning);padding-left:12px;margin:18px 0;font-size:13px}
   .sembunyi{display:none}
+
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .tampilan{display:none}
+  .tampilan.aktif{display:block}
+
+  .tab{position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:var(--card);border-top:1px solid var(--line);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:repeat(5,1fr);align-items:end}
+  .tab button{background:none;border:0;cursor:pointer;padding:4px 2px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;color:#8C9E8F}
+  .tab button .ikon{width:25px;height:25px;background-color:currentColor;
+    -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+    -webkit-mask-position:center;mask-position:center;
+    -webkit-mask-size:contain;mask-size:contain}
+  .tab button .label{font-size:11px;font-weight:600;letter-spacing:0.01em}
+  .tab button[aria-selected="true"]{color:var(--hijau)}
+  .tab .pusat{margin-top:-26px}
+  .tab .pusat .bulat{width:58px;height:58px;border-radius:50%;background:var(--hijau);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(31,122,70,0.28)}
+  .tab .pusat .bulat .ikon{width:27px;height:27px;background-color:#fff}
+  .tab .pusat .label{color:var(--muted)}
+  .tab .pusat:active .bulat{filter:brightness(.92)}
+
+  .grafik{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 12px 10px;margin-bottom:14px}
+  .batang{display:flex;align-items:flex-end;gap:5px;height:140px;margin-bottom:8px}
+  .batang .hari{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:3px}
+  .batang .isi{border-radius:4px 4px 0 0;background:var(--hijau);min-height:2px}
+  .batang .isi.lewat{background:var(--lebih)}
+  .batang .tgl{font-size:10px;color:var(--muted);text-align:center}
+  .garisTarget{border-top:1px dashed var(--line);margin-top:-1px}
+  .legenda{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+  .legenda i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+
+  .kosongTab{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:14px;font-size:14px;color:var(--muted);line-height:1.6}
+  .kartuBagi{width:100%;border-radius:12px;border:1px solid var(--line);display:block;margin-bottom:12px}
+
+  .menu{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+  .menuBaris{display:flex;align-items:center;justify-content:space-between;width:100%;
+    background:none;border:0;border-bottom:1px solid var(--line2);
+    padding:16px 15px;cursor:pointer;color:var(--text);font-size:16px;text-align:left}
+  .menuBaris:last-child{border-bottom:0}
+  .menuBaris:active{background:var(--line2)}
+  .menuBaris::after{content:"\203A";color:#A7B6A4;font-size:22px;line-height:1}
+  .balik{background:none;border:0;color:var(--hijau);font-size:15px;font-weight:600;
+    padding:4px 0 10px;cursor:pointer}
+  .balik::before{content:"\2039";margin-right:7px;font-size:20px;line-height:1}
+  .sub{padding-bottom:10px}
   @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
 </head>
@@ -136,6 +185,7 @@
     <span class="tanggal" id="tanggal"></span>
   </header>
 
+  <section class="tampilan aktif" id="v-hari">
   <div class="hero">
     <svg class="ring" viewBox="0 0 216 216" role="img" aria-labelledby="ringLabel">
       <title id="ringLabel">Sisa kalori hari ini</title>
@@ -155,6 +205,8 @@
     <div><b class="hijau" id="statGerak">0</b><span>Dibakar olahraga</span></div>
     <div><b id="statDefisit">0</b><span>Target defisit</span></div>
   </div>
+
+  <p class="peringatan" id="peringatan" hidden></p>
 
   <h2>Hitung dari foto</h2>
   <div class="foto">
@@ -208,88 +260,214 @@
   <h2>Catatan hari ini</h2>
   <ul id="daftar"></ul>
 
-  <details id="panelProfil">
-    <summary>Data diri dan target</summary>
-    <div class="form">
-      <div>
-        <label for="jk">Jenis kelamin</label>
-        <select id="jk"><option value="pria">Pria</option><option value="wanita">Wanita</option></select>
-      </div>
-      <div>
-        <label for="usia">Usia (tahun)</label>
-        <input id="usia" type="number" inputmode="numeric" min="15" max="90">
-      </div>
-      <div>
-        <label for="berat">Berat (kg)</label>
-        <input id="berat" type="number" inputmode="decimal" min="30" max="250">
-      </div>
-      <div>
-        <label for="tinggi">Tinggi (cm)</label>
-        <input id="tinggi" type="number" inputmode="numeric" min="120" max="220">
-      </div>
-      <div class="lebar">
-        <label for="aktivitas">Aktivitas harian di luar olahraga</label>
-        <select id="aktivitas">
-          <option value="1.2">Jarang gerak, kerja duduk</option>
-          <option value="1.375">Cukup banyak berjalan</option>
-          <option value="1.55">Banyak berdiri dan berpindah</option>
-          <option value="1.725">Kerja fisik berat seharian</option>
-        </select>
-      </div>
-      <p class="bantuan lebar" style="margin:0">
-        Kalau olahraga kamu catat di bagian atas, pilih tingkat yang lebih rendah di sini. Kalau tidak, olahraganya terhitung dua kali.
-      </p>
-      <div class="lebar">
-        <label for="defisit">Kecepatan turun berat</label>
-        <select id="defisit">
-          <option value="0">Jaga berat saat ini</option>
-          <option value="250">Pelan, sekitar 0,25 kg per minggu</option>
-          <option value="500">Sedang, sekitar 0,5 kg per minggu</option>
-        </select>
+  </section>
+
+  <section class="tampilan" id="v-riwayat">
+    <h2>Tujuh hari terakhir</h2>
+    <div class="grafik">
+      <div class="batang" id="batang"></div>
+      <div class="legenda">
+        <span><i style="background:var(--hijau)"></i>Di bawah target</span>
+        <span><i style="background:var(--lebih)"></i>Lewat target</span>
       </div>
     </div>
-  </details>
-
-  <details id="panelKunci">
-    <summary>Pengaturan AI</summary>
-    <p class="bantuan">
-      Ambil API key gratis di <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>, login pakai akun Google, tekan Create API key, lalu salin ke bawah.
-      Key disimpan di hp kamu saja. Foto dan nama makanan dikirim ke server Google, dan di paket gratis Google boleh memakai isinya untuk pengembangan produk mereka.
-    </p>
-    <div class="form">
-      <div class="lebar">
-        <label for="kunci">API key Gemini</label>
-        <input id="kunci" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
-      </div>
-      <div class="lebar">
-        <label for="model">Model</label>
-        <select id="model"><option value="">Simpan key dulu untuk memuat daftar model</option></select>
-      </div>
-      <div class="lebar">
-        <button class="utama" id="btnKunci" style="width:100%">Simpan dan muat model</button>
-      </div>
-      <p class="bantuan lebar" id="pesanKunci" style="margin:0"></p>
+    <div class="stat">
+      <div><b id="rataMasuk">0</b><span>Rata rata kalori masuk</span></div>
+      <div><b id="rataDefisit">0</b><span>Rata rata defisit</span></div>
+      <div><b id="hariTercatat">0</b><span>Hari tercatat</span></div>
+      <div><b id="totalDefisit">0</b><span>Total defisit</span></div>
     </div>
-  </details>
+    <p class="nota" id="tafsirDefisit"></p>
 
-  <details>
-    <summary>Bersihkan data</summary>
-    <div class="form">
-      <div class="lebar"><button class="kedua" id="btnHapusRiwayat" style="width:100%">Kosongkan daftar makanan favorit</button></div>
-      <div class="lebar"><button class="kedua" id="btnHapusHari" style="width:100%">Hapus catatan hari ini</button></div>
+    <h2>Berat badan</h2>
+    <div class="baris">
+      <input id="beratHari" type="number" inputmode="decimal" min="30" max="250" placeholder="Berat hari ini (kg)">
+      <button class="utama" id="btnBerat" style="flex:none">Simpan</button>
     </div>
-  </details>
+    <ul id="daftarBerat"></ul>
+  </section>
 
-  <p class="peringatan" id="peringatan" hidden></p>
+  <section class="tampilan" id="v-teman">
+    <h2>Bagikan hari ini</h2>
+    <canvas id="kartu" class="kartuBagi" width="1080" height="1080" aria-label="Kartu ringkasan hari ini"></canvas>
+    <div class="baris">
+      <button class="utama" id="btnBagikan" style="flex:1">Bagikan</button>
+      <button class="kedua" id="btnUnduhKartu" style="flex:1">Simpan gambar</button>
+    </div>
+    <p class="pesanKecil" id="pesanBagi"></p>
 
-  <p class="catatan">
+    <h2>Teman</h2>
+    <div class="kosongTab">
+      Bagian teman dan thread belum aktif. Untuk sementara kamu bisa membagikan kartu di atas lewat WhatsApp atau aplikasi lain.
+      Nanti tempat ini berisi linimasa makan dan olahraga dari teman yang kamu tambahkan, tanpa mengubah susunan menu ini.
+    </div>
+  </section>
+
+  <section class="tampilan" id="v-saya">
+
+    <div id="sayaMenu">
+      <div class="menu">
+        <button type="button" class="menuBaris" data-sub="profil"><span>Profil dan target</span></button>
+        <button type="button" class="menuBaris" data-sub="pengaturan"><span>Pengaturan AI</span></button>
+        <button type="button" class="menuBaris" data-sub="privasi"><span>Pengelolaan privasi</span></button>
+      </div>
+      <div class="menu">
+        <button type="button" class="menuBaris" data-sub="bantuan"><span>Bantuan</span></button>
+        <button type="button" class="menuBaris" data-sub="tentang"><span>Tentang</span></button>
+      </div>
+      <p class="nota" id="ringkasProfil"></p>
+    </div>
+
+    <div id="sayaSub" class="sembunyi">
+      <button type="button" class="balik" id="btnBalik">Kembali</button>
+      <h2 id="judulSub"></h2>
+
+      <div class="sub" id="sub-profil">
+        <div class="form">
+        <div>
+          <label for="jk">Jenis kelamin</label>
+          <select id="jk"><option value="pria">Pria</option><option value="wanita">Wanita</option></select>
+        </div>
+        <div>
+          <label for="usia">Usia (tahun)</label>
+          <input id="usia" type="number" inputmode="numeric" min="15" max="90">
+        </div>
+        <div>
+          <label for="berat">Berat (kg)</label>
+          <input id="berat" type="number" inputmode="decimal" min="30" max="250">
+        </div>
+        <div>
+          <label for="tinggi">Tinggi (cm)</label>
+          <input id="tinggi" type="number" inputmode="numeric" min="120" max="220">
+        </div>
+        <div class="lebar">
+          <label for="aktivitas">Aktivitas harian di luar olahraga</label>
+          <select id="aktivitas">
+            <option value="1.2">Jarang gerak, kerja duduk</option>
+            <option value="1.375">Cukup banyak berjalan</option>
+            <option value="1.55">Banyak berdiri dan berpindah</option>
+            <option value="1.725">Kerja fisik berat seharian</option>
+          </select>
+        </div>
+        <p class="bantuan lebar" style="margin:0">
+          Kalau olahraga kamu catat di bagian atas, pilih tingkat yang lebih rendah di sini. Kalau tidak, olahraganya terhitung dua kali.
+        </p>
+        <div class="lebar">
+          <label for="defisit">Kecepatan turun berat</label>
+          <select id="defisit">
+            <option value="0">Jaga berat saat ini</option>
+            <option value="250">Pelan, sekitar 0,25 kg per minggu</option>
+            <option value="500">Sedang, sekitar 0,5 kg per minggu</option>
+          </select>
+        </div>
+      </div>
+
+      </div>
+
+      <div class="sub sembunyi" id="sub-pengaturan">
+        <p class="bantuan">
+          Fitur foto dan pencarian kalori memakai Gemini dari Google. Ambil API key gratis di
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>,
+          login pakai akun Google, tekan Create API key, lalu salin ke bawah.
+        </p>
+        <div class="form">
+          <div class="lebar">
+            <label for="kunci">API key Gemini</label>
+            <input id="kunci" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
+          </div>
+          <div class="lebar">
+            <label for="model">Model</label>
+            <select id="model"><option value="">Simpan key dulu untuk memuat daftar model</option></select>
+          </div>
+          <div class="lebar">
+            <button class="utama" id="btnKunci" style="width:100%">Simpan dan muat model</button>
+          </div>
+          <p class="bantuan lebar" id="pesanKunci" style="margin:0"></p>
+        </div>
+      </div>
+
+      <div class="sub sembunyi" id="sub-privasi">
+        <p class="bantuan">
+          Catatan makanan, olahraga, berat badan, data diri, dan API key disimpan di penyimpanan browser hp ini saja.
+          Tidak ada akun, tidak ada server milik aplikasi ini, dan tidak ada yang bisa melihat catatanmu selain kamu.
+        </p>
+        <p class="bantuan">
+          Pengecualian ada satu. Saat kamu memakai fitur foto atau pencarian kalori, foto dan teks yang kamu kirim
+          diteruskan ke server Google untuk dibaca. Di paket gratis, Google menyatakan boleh memakai isinya untuk
+          pengembangan produk mereka. Kalau kamu keberatan, jangan pakai fitur foto, catat manual saja.
+        </p>
+        <p class="bantuan">
+          Menghapus data penjelajahan Chrome atau data aplikasi ini di pengaturan Android akan menghapus semua catatanmu,
+          dan tidak ada salinan cadangan di tempat lain.
+        </p>
+        <div class="form">
+          <div class="lebar"><button class="kedua" id="btnHapusHari" style="width:100%">Hapus catatan hari ini</button></div>
+          <div class="lebar"><button class="kedua" id="btnHapusRiwayat" style="width:100%">Kosongkan daftar makanan favorit</button></div>
+          <div class="lebar"><button class="kedua" id="btnHapusSemua" style="width:100%">Hapus semua data termasuk riwayat</button></div>
+          <p class="bantuan lebar" id="pesanHapus" style="margin:0"></p>
+        </div>
+      </div>
+
+      <div class="sub sembunyi" id="sub-bantuan">
+        <p class="bantuan">
+          <b>Cara memakai.</b> Isi dulu Profil dan target supaya angkanya masuk akal. Lalu tekan tombol kamera di tengah,
+          foto makananmu, periksa hasil bacaannya, dan atur pengali porsi kalau isi piringmu berbeda dari tebakannya.
+        </p>
+        <p class="bantuan">
+          <b>Kalau hasil fotonya meleset.</b> Ketik keterangan di kotak di bawah tombol foto, misalnya nasinya tiga centong.
+          Keterangan itu lebih dipercaya daripada tebakan modelnya.
+        </p>
+        <p class="bantuan">
+          <b>Pesan kesalahan yang mungkin muncul.</b> Kode 503 berarti server Google sedang penuh, aplikasi akan mencoba
+          ulang sendiri. Kode 429 berarti kuota gratis harian habis, tunggu besok. Kode 400 atau 403 berarti API key salah
+          atau belum aktif. Kode 404 berarti nama model berubah, pilih ulang di Pengaturan AI.
+        </p>
+        <p class="bantuan">
+          <b>Olahraga terhitung dua kali.</b> Kalau kamu mencatat olahraga di tab Hari ini, pilih tingkat aktivitas harian
+          yang lebih rendah di Profil, karena tingkat aktivitas itu sudah memasukkan olahraga.
+        </p>
+      </div>
+
+      <div class="sub sembunyi" id="sub-tentang">
+        <p class="bantuan">
+          SnapEat, pencatat kalori dan defisit harian. Aplikasi web yang jalan langsung di browser, tanpa akun dan tanpa server.
+        </p>
+        <p class="bantuan">
     Kebutuhan kalori dihitung dengan rumus Mifflin St Jeor, dan kalori olahraga memakai nilai MET standar yang disesuaikan dengan beratmu. Semua angka di sini perkiraan, bukan hasil timbang atau uji lab.
     Taksiran dari foto paling sering meleset di bagian porsi dan minyak, jadi pakai pengali porsi kalau isi piringmu berbeda dari yang tertulis.
     Aplikasi ini membatasi defisit maksimal 500 kkal per hari dan tidak menurunkan target di bawah batas aman.
     Untuk kondisi kesehatan tertentu atau target yang lebih agresif, bicarakan dulu dengan dokter atau ahli gizi.
   </p>
+      </div>
+    </div>
+  </section>
+
+
 
 </div>
+
+<nav class="tab" role="tablist" aria-label="Menu utama">
+  <button type="button" role="tab" data-ke="hari" aria-selected="true">
+    <span class="ikon" style="-webkit-mask-image:url(tab-hari.png);mask-image:url(tab-hari.png)"></span>
+    <span class="label">Hari ini</span>
+  </button>
+  <button type="button" role="tab" data-ke="riwayat" aria-selected="false">
+    <span class="ikon" style="-webkit-mask-image:url(tab-riwayat.png);mask-image:url(tab-riwayat.png)"></span>
+    <span class="label">Riwayat</span>
+  </button>
+  <button type="button" class="pusat" id="tabFoto" aria-label="Ambil foto makanan">
+    <span class="bulat"><span class="ikon" style="-webkit-mask-image:url(tab-foto.png);mask-image:url(tab-foto.png)"></span></span>
+    <span class="label">Foto</span>
+  </button>
+  <button type="button" role="tab" data-ke="teman" aria-selected="false">
+    <span class="ikon" style="-webkit-mask-image:url(tab-teman.png);mask-image:url(tab-teman.png)"></span>
+    <span class="label">Teman</span>
+  </button>
+  <button type="button" role="tab" data-ke="saya" aria-selected="false">
+    <span class="ikon" style="-webkit-mask-image:url(tab-saya.png);mask-image:url(tab-saya.png)"></span>
+    <span class="label">Saya</span>
+  </button>
+</nav>
 
 <script>
 (function(){
@@ -316,7 +494,7 @@
   };
 
   var profilDefault = { jk:"pria", usia:25, berat:70, tinggi:170, aktivitas:1.375, defisit:250 };
-  var profil, items, gerak, hariIni, sering = {}, hasilFoto = [];
+  var profil, items, gerak, hariIni, sering = {}, riwayat = {}, hasilFoto = [];
   var kunci = simpan.get("dk_key") || "";
   var model = simpan.get("dk_model") || "";
   var $ = function(id){ return document.getElementById(id); };
@@ -333,10 +511,10 @@
       if(log && log.tanggal===hariIni){ items=log.items||[]; gerak=log.gerak||[]; }
     }catch(e){}
     try{ sering = JSON.parse(simpan.get("dk_sering")) || {}; }catch(e){ sering = {}; }
+    try{ riwayat = JSON.parse(simpan.get("dk_riwayat")) || {}; }catch(e){ riwayat = {}; }
     $("jk").value=profil.jk; $("usia").value=profil.usia; $("berat").value=profil.berat;
     $("tinggi").value=profil.tinggi; $("aktivitas").value=profil.aktivitas; $("defisit").value=profil.defisit;
     $("kunci").value=kunci;
-    if(!adaProfil) $("panelProfil").open=true;
     if(model) $("model").innerHTML='<option value="'+model+'">'+model+'</option>';
   }
 
@@ -344,7 +522,22 @@
     simpan.set("dk_profil", JSON.stringify(profil));
     simpan.set("dk_log", JSON.stringify({ tanggal:hariIni, items:items, gerak:gerak }));
     simpan.set("dk_sering", JSON.stringify(sering));
+    rekamHariIni();
+    simpan.set("dk_riwayat", JSON.stringify(riwayat));
   }
+
+  function rekamHariIni(){
+    var h=hitung();
+    var masuk=items.reduce(function(a,b){ return a+b.kkal; },0);
+    var lama=riwayat[hariIni]||{};
+    riwayat[hariIni]={ masuk:masuk, target:h.target, bakar:h.terbakar, potong:h.potong, berat:lama.berat };
+    var kunciHari=Object.keys(riwayat).sort(urutTanggal);
+    while(kunciHari.length>90){ delete riwayat[kunciHari.shift()]; }
+  }
+
+  function urutTanggal(a,b){ return baru(a)-baru(b); }
+  function baru(t){ var b=t.split("-"); return new Date(+b[0], +b[1]-1, +b[2]).getTime(); }
+  function labelPendek(t){ var b=t.split("-"); return b[2]+"/"+b[1]; }
 
   function angka(id,fallback){ var v=parseFloat($(id).value); return isFinite(v)&&v>0?v:fallback; }
 
@@ -457,8 +650,8 @@
 
   function siapAI(){
     if(kunci && model) return true;
-    $("panelKunci").open=true;
-    $("panelKunci").scrollIntoView({behavior:"smooth",block:"center"});
+    keTab("saya");
+    bukaSub("pengaturan");
     return false;
   }
 
@@ -751,12 +944,258 @@
   $("btnHapusHari").onclick=function(){ items=[]; gerak=[]; simpanSemua(); render(); };
 
   ["jk","usia","berat","tinggi","aktivitas","defisit"].forEach(function(id){
-    $(id).addEventListener("change",function(){ bacaProfil(); simpanSemua(); render(); });
+    $(id).addEventListener("change",function(){ bacaProfil(); simpanSemua(); render(); ringkasProfil(); });
   });
+
+
+  // Perpindahan tab
+
+  var tampilanAktif = "hari";
+  function keTab(nama){
+    tampilanAktif = nama;
+    ["hari","riwayat","teman","saya"].forEach(function(n){
+      var el=$("v-"+n);
+      if(el) el.className = "tampilan" + (n===nama ? " aktif" : "");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab button[data-ke]'), function(b){
+      b.setAttribute("aria-selected", b.getAttribute("data-ke")===nama ? "true" : "false");
+    });
+    window.scrollTo(0,0);
+    if(nama==="riwayat") gambarRiwayat();
+    if(nama==="teman") gambarKartu();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.tab button[data-ke]'), function(b){
+    b.onclick=function(){ keTab(b.getAttribute("data-ke")); };
+  });
+  $("tabFoto").onclick=function(){
+    if(!siapAI()){ keTab("saya"); return; }
+    keTab("hari");
+    $("fileKamera").click();
+  };
+
+  // Riwayat dan grafik
+
+  function gambarRiwayat(){
+    var kunciHari=Object.keys(riwayat).sort(urutTanggal);
+    var tujuh=kunciHari.slice(-7);
+    var wadah=$("batang"); wadah.innerHTML="";
+
+    var puncak=1;
+    tujuh.forEach(function(t){ puncak=Math.max(puncak, riwayat[t].masuk||0, riwayat[t].target||0); });
+
+    if(tujuh.length===0){
+      var p=document.createElement("p");
+      p.className="kosongTab"; p.style.margin="0";
+      p.textContent="Belum ada data. Grafiknya terisi sendiri setelah kamu mencatat makanan beberapa hari.";
+      wadah.appendChild(p);
+    }
+    tujuh.forEach(function(t){
+      var d=riwayat[t];
+      var kolom=document.createElement("div"); kolom.className="hari";
+      var isi=document.createElement("div");
+      isi.className="isi"+((d.masuk>d.target)?" lewat":"");
+      isi.style.height=Math.max(2, Math.round((d.masuk/puncak)*118))+"px";
+      isi.title=d.masuk+" kkal dari target "+d.target;
+      var tgl=document.createElement("div"); tgl.className="tgl"; tgl.textContent=labelPendek(t);
+      kolom.appendChild(isi); kolom.appendChild(tgl);
+      wadah.appendChild(kolom);
+    });
+
+    var terisi=kunciHari.filter(function(t){ return (riwayat[t].masuk||0)>0; });
+    var totMasuk=0, totDefisit=0;
+    terisi.forEach(function(t){
+      var d=riwayat[t];
+      totMasuk+=d.masuk;
+      totDefisit+=(d.target + d.potong - d.masuk);
+    });
+    var n=terisi.length||1;
+    $("rataMasuk").textContent=Math.round(totMasuk/n);
+    $("rataDefisit").textContent=Math.round(totDefisit/n);
+    $("hariTercatat").textContent=terisi.length;
+    $("totalDefisit").textContent=Math.round(totDefisit);
+
+    var kg=(totDefisit/7700);
+    $("tafsirDefisit").textContent = terisi.length===0
+      ? "Ringkasan muncul setelah ada hari yang tercatat."
+      : "Total defisit sejauh ini setara sekitar "+kg.toFixed(2)+" kg lemak tubuh. Angka ini ikut meleset kalau catatanmu ada yang bolong.";
+
+    var ub=$("daftarBerat"); ub.innerHTML="";
+    var beratAda=kunciHari.filter(function(t){ return riwayat[t].berat; }).slice(-7).reverse();
+    if(beratAda.length===0){
+      var li=document.createElement("li"); li.className="kosong";
+      li.textContent="Belum ada catatan berat. Timbang di jam yang sama tiap hari supaya perbandingannya adil.";
+      ub.appendChild(li);
+    }
+    beratAda.forEach(function(t,i){
+      var li=document.createElement("li");
+      var nm=document.createElement("span"); nm.className="nama"; nm.textContent=labelPendek(t);
+      var nl=document.createElement("span"); nl.className="kkal";
+      var selisih="";
+      if(i<beratAda.length-1){
+        var bd=riwayat[t].berat - riwayat[beratAda[i+1]].berat;
+        if(Math.abs(bd)>=0.05) selisih=" ("+(bd>0?"+":"")+bd.toFixed(1)+")";
+      }
+      nl.textContent=riwayat[t].berat+" kg"+selisih;
+      li.appendChild(nm); li.appendChild(nl);
+      ub.appendChild(li);
+    });
+  }
+
+  $("btnBerat").onclick=function(){
+    var b=parseFloat($("beratHari").value);
+    if(!isFinite(b) || b<20 || b>300){ $("beratHari").focus(); return; }
+    profil.berat=b; $("berat").value=b;
+    simpanSemua();
+    riwayat[hariIni].berat=b;
+    simpan.set("dk_riwayat", JSON.stringify(riwayat));
+    $("beratHari").value="";
+    render(); gambarRiwayat();
+  };
+
+  // Kartu untuk dibagikan
+
+  function gambarKartu(){
+    var c=$("kartu"), x=c.getContext ? c.getContext("2d") : null;
+    if(!x){ $("pesanBagi").textContent="Peramban ini tidak bisa menggambar kartu."; return; }
+    var h=hitung();
+    var masuk=items.reduce(function(a,b){ return a+b.kkal; },0);
+    var sisa=h.target-masuk;
+
+    x.fillStyle="#F4F7EE"; x.fillRect(0,0,1080,1080);
+    x.fillStyle="#1F7A46"; x.fillRect(0,0,1080,14);
+
+    x.fillStyle="#17322A"; x.font="700 58px sans-serif"; x.textAlign="left";
+    x.fillText("SnapEat", 72, 130);
+    x.fillStyle="#63786B"; x.font="400 34px sans-serif";
+    x.fillText(new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long"}), 72, 186);
+
+    var cx=540, cy=470, r=170;
+    x.lineWidth=38; x.strokeStyle="#E6EDDC";
+    x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2); x.stroke();
+    var rasio=h.target>0?Math.min(masuk/h.target,1):0;
+    x.strokeStyle = sisa<0 ? "#D14A32" : "#F2A93B";
+    x.lineCap="round";
+    x.beginPath(); x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*rasio); x.stroke();
+
+    x.textAlign="center"; x.fillStyle="#17322A"; x.font="700 96px sans-serif";
+    x.fillText(String(masuk), cx, cy+16);
+    x.fillStyle="#63786B"; x.font="400 32px sans-serif";
+    x.fillText("kkal masuk dari "+h.target, cx, cy+70);
+
+    var y=740;
+    x.textAlign="left"; x.font="400 34px sans-serif";
+    var daftarTeks=items.slice(0,5);
+    if(daftarTeks.length===0){
+      x.fillStyle="#63786B";
+      x.fillText("Belum ada makanan yang dicatat.", 72, y);
+    }
+    daftarTeks.forEach(function(it){
+      x.fillStyle="#17322A";
+      var nm=it.nama.length>34 ? it.nama.slice(0,33)+"\u2026" : it.nama;
+      x.fillText(nm, 72, y);
+      x.fillStyle="#63786B"; x.textAlign="right";
+      x.fillText(it.kkal+" kkal", 1008, y);
+      x.textAlign="left";
+      y+=58;
+    });
+    if(items.length>5){
+      x.fillStyle="#63786B";
+      x.fillText("dan "+(items.length-5)+" lainnya", 72, y); y+=58;
+    }
+    if(h.terbakar>0){
+      x.fillStyle="#1F7A46";
+      x.fillText("Olahraga membakar "+h.terbakar+" kkal", 72, y);
+    }
+
+    x.fillStyle="#8C9E8F"; x.font="400 26px sans-serif"; x.textAlign="center";
+    x.fillText("Angka perkiraan, bukan hasil timbang", 540, 1020);
+  }
+
+  function kartuKeBlob(){
+    return new Promise(function(res){ $("kartu").toBlob(function(b){ res(b); }, "image/png"); });
+  }
+
+  $("btnBagikan").onclick=async function(){
+    var p=$("pesanBagi"); p.className="pesanKecil";
+    try{
+      var blob=await kartuKeBlob();
+      var berkas=new File([blob], "snapeat.png", { type:"image/png" });
+      if(navigator.canShare && navigator.canShare({ files:[berkas] })){
+        await navigator.share({ files:[berkas], text:"Catatan makan hari ini" });
+        p.textContent="";
+      } else {
+        p.textContent="Hp ini tidak mendukung bagikan langsung. Pakai tombol Simpan gambar lalu kirim manual.";
+      }
+    }catch(e){ p.textContent=""; }
+  };
+
+  $("btnUnduhKartu").onclick=async function(){
+    var blob=await kartuKeBlob();
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="snapeat-"+hariIni+".png";
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  };
+
+
+  // Menu di tab Saya
+
+  var judulSub = { profil:"Profil dan target", pengaturan:"Pengaturan AI",
+    privasi:"Pengelolaan privasi", bantuan:"Bantuan", tentang:"Tentang" };
+
+  function bukaSub(nama){
+    $("sayaMenu").className="sembunyi";
+    $("sayaSub").className="";
+    $("judulSub").textContent=judulSub[nama]||"";
+    Object.keys(judulSub).forEach(function(n){
+      var el=$("sub-"+n);
+      if(el) el.className = "sub" + (n===nama ? "" : " sembunyi");
+    });
+    window.scrollTo(0,0);
+  }
+  function tutupSub(){
+    $("sayaSub").className="sembunyi";
+    $("sayaMenu").className="";
+    ringkasProfil();
+    window.scrollTo(0,0);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".menuBaris"), function(b){
+    b.onclick=function(){ bukaSub(b.getAttribute("data-sub")); };
+  });
+  $("btnBalik").onclick=tutupSub;
+
+  function ringkasProfil(){
+    var h=hitung();
+    $("ringkasProfil").textContent = profil.jk.charAt(0).toUpperCase()+profil.jk.slice(1)+
+      ", "+profil.usia+" tahun, "+profil.berat+" kg, "+profil.tinggi+" cm. "+
+      "Target "+h.dasar+" kkal per hari"+(kunci&&model ? ", fitur foto aktif." : ", fitur foto belum aktif.");
+  }
+
+  $("btnHapusSemua").onclick=function(){
+    var p=$("pesanHapus");
+    if(this.getAttribute("data-yakin")!=="1"){
+      this.setAttribute("data-yakin","1");
+      this.textContent="Tekan sekali lagi untuk menghapus permanen";
+      p.textContent="Semua catatan, riwayat, berat badan, dan data diri akan hilang. API key ikut terhapus.";
+      return;
+    }
+    ["dk_log","dk_sering","dk_riwayat","dk_profil"].forEach(function(k){
+      memori[k]=undefined;
+      try{ localStorage.removeItem(k); }catch(e){}
+    });
+    items=[]; gerak=[]; sering={}; riwayat={}; profil=profilDefault;
+    this.removeAttribute("data-yakin");
+    this.textContent="Hapus semua data termasuk riwayat";
+    p.textContent="Semua data sudah dihapus.";
+    muat(); render(); ringkasProfil();
+  };
 
   $("tanggal").textContent=new Date().toLocaleDateString("id-ID",{ weekday:"long", day:"numeric", month:"long" });
 
   muat(); render();
+  if(!simpan.get("dk_profil")){ keTab("saya"); bukaSub("profil"); }
+  ringkasProfil();
   if(kunci && !model) muatModel();
 })();
 </script>
