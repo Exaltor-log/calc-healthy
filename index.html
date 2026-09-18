@@ -174,6 +174,27 @@
     padding:4px 0 10px;cursor:pointer}
   .balik::before{content:"\2039";margin-right:7px;font-size:20px;line-height:1}
   .sub{padding-bottom:10px}
+
+  .target{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 14px;margin-bottom:14px}
+  .target .angkaBesar{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1.15}
+  .target .ket{font-size:13px;color:var(--muted);margin:2px 0 0}
+  .skala{margin:16px 0 6px}
+  .skala .jalur{position:relative;height:12px;border-radius:6px;overflow:hidden;background:var(--line2)}
+  .skala .sehat{position:absolute;top:0;bottom:0;background:#BFE3C8}
+  .skala .tanda{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--text)}
+  .skala .tanda.tuju{background:var(--kuning)}
+  .skala .kaki{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);
+    font-variant-numeric:tabular-nums;margin-top:8px}
+  .barisTarget{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:13px}
+  .barisTarget span{color:var(--muted)}
+  .barisTarget b{color:var(--text);font-variant-numeric:tabular-nums}
+
+  .catatanScan{background:#F2F7EB;border:1px solid var(--line);border-radius:12px;
+    padding:11px 12px;margin:0 0 12px;font-size:13.5px;line-height:1.55;color:var(--text)}
+  .catatanScan.penuh{background:#FDF2E6;border-color:#EBD4B4}
+  .catatanScan b{font-variant-numeric:tabular-nums}
+  .catatanScan .saran{display:block;margin-top:6px;color:var(--muted)}
+  .item .porsiKet{font-size:12px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
   @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
 </head>
@@ -224,6 +245,7 @@
 
   <div class="hasil" id="hasil">
     <h2>Hasil pembacaan, atur porsinya kalau meleset</h2>
+    <div class="catatanScan" id="catatanHasil"></div>
     <div id="hasilItem"></div>
     <button class="utama" id="btnSimpanHasil" style="width:100%">Masukkan ke catatan</button>
   </div>
@@ -263,6 +285,21 @@
   </section>
 
   <section class="tampilan" id="v-riwayat">
+    <h2>Target berat</h2>
+    <div class="target" id="kartuTarget">
+      <div class="angkaBesar" id="targetAngka">0 kg</div>
+      <p class="ket" id="targetKet"></p>
+      <div class="skala">
+        <div class="jalur"><div class="sehat" id="skalaSehat"></div><div class="tanda" id="skalaKini"></div><div class="tanda tuju" id="skalaTuju"></div></div>
+        <div class="kaki"><span id="skalaKiri"></span><span id="skalaKanan"></span></div>
+      </div>
+      <div class="barisTarget">
+        <span>Rentang sehat <b id="rentangSehat">0</b></span>
+        <span>BMI sekarang <b id="bmiKini">0</b></span>
+      </div>
+      <p class="ket" id="targetTempo" style="margin-top:12px"></p>
+    </div>
+
     <h2>Tujuh hari terakhir</h2>
     <div class="grafik">
       <div class="batang" id="batang"></div>
@@ -353,6 +390,11 @@
           Kalau olahraga kamu catat di bagian atas, pilih tingkat yang lebih rendah di sini. Kalau tidak, olahraganya terhitung dua kali.
         </p>
         <div class="lebar">
+          <label for="targetBerat">Berat yang kamu tuju (kg)</label>
+          <input id="targetBerat" type="number" inputmode="decimal" min="30" max="250" placeholder="Kosongkan kalau belum punya target">
+        </div>
+        <p class="bantuan lebar" id="sehatProfil" style="margin:0"></p>
+        <div class="lebar">
           <label for="defisit">Kecepatan turun berat</label>
           <select id="defisit">
             <option value="0">Jaga berat saat ini</option>
@@ -421,6 +463,16 @@
           <b>Pesan kesalahan yang mungkin muncul.</b> Kode 503 berarti server Google sedang penuh, aplikasi akan mencoba
           ulang sendiri. Kalau kuota satu model habis, aplikasi otomatis pindah ke model berikutnya di daftar dan memberi tahu kamu, karena jatah dihitung terpisah per model. Kuota Google direset tiap jam 2 siang WIB. Kode 400 atau 403 berarti API key salah
           atau belum aktif. Kode 404 berarti nama model berubah, pilih ulang di Pengaturan AI.
+        </p>
+        <p class="bantuan">
+          <b>Target berat.</b> Isi berat yang kamu tuju di Profil dan target. Tab Riwayat lalu menampilkan rentang berat sehat
+          untuk tinggimu, posisi beratmu sekarang, dan perkiraan berapa lama target itu tercapai dengan defisit yang kamu pilih.
+          Rentang sehat memakai BMI, yang tidak membedakan otot dan lemak, jadi perlakukan sebagai patokan kasar.
+        </p>
+        <p class="bantuan">
+          <b>Catatan saat memotret.</b> Setiap hasil foto disertai berapa persen jatah harian yang dipakai dan berapa sisa jatahmu.
+          Kalau isinya melebihi sisa, aplikasi menghitung takaran yang muat, misalnya dibagi berapa bagian dan berapa yang dimakan.
+          Angka itu dihitung di aplikasi, bukan ditanyakan ke AI, jadi tidak ikut salah hitung.
         </p>
         <p class="bantuan">
           <b>Olahraga terhitung dua kali.</b> Kalau kamu mencatat olahraga di tab Hari ini, pilih tingkat aktivitas harian
@@ -493,7 +545,7 @@
     set:function(k,v){ memori[k]=v; try{ localStorage.setItem(k,v); }catch(e){} }
   };
 
-  var profilDefault = { jk:"pria", usia:25, berat:70, tinggi:170, aktivitas:1.375, defisit:250 };
+  var profilDefault = { jk:"pria", usia:25, berat:70, tinggi:170, aktivitas:1.375, defisit:250, target:0 };
   var profil, items, gerak, hariIni, sering = {}, riwayat = {}, hasilFoto = [];
   var kunci = simpan.get("dk_key") || "";
   var daftarModel = [];
@@ -516,6 +568,7 @@
     try{ riwayat = JSON.parse(simpan.get("dk_riwayat")) || {}; }catch(e){ riwayat = {}; }
     $("jk").value=profil.jk; $("usia").value=profil.usia; $("berat").value=profil.berat;
     $("tinggi").value=profil.tinggi; $("aktivitas").value=profil.aktivitas; $("defisit").value=profil.defisit;
+    $("targetBerat").value = profil.target ? profil.target : "";
     $("kunci").value=kunci;
     if(model) $("model").innerHTML='<option value="'+model+'">'+model+'</option>';
   }
@@ -544,8 +597,34 @@
   function angka(id,fallback){ var v=parseFloat($(id).value); return isFinite(v)&&v>0?v:fallback; }
 
   function bacaProfil(){
+    var t=parseFloat($("targetBerat").value);
     profil={ jk:$("jk").value, usia:angka("usia",25), berat:angka("berat",70), tinggi:angka("tinggi",170),
-      aktivitas:parseFloat($("aktivitas").value), defisit:parseFloat($("defisit").value) };
+      aktivitas:parseFloat($("aktivitas").value), defisit:parseFloat($("defisit").value),
+      target: (isFinite(t) && t>=25 && t<=300) ? t : 0 };
+  }
+
+  // Berat sehat dan target
+
+  var KKAL_PER_KG = 7700;
+
+  function bmi(berat){
+    var m = profil.tinggi/100;
+    return m>0 ? berat/(m*m) : 0;
+  }
+  function beratDariBmi(nilai){
+    var m = profil.tinggi/100;
+    return nilai*m*m;
+  }
+  function rentangSehat(){
+    return { bawah: beratDariBmi(18.5), atas: beratDariBmi(24.9) };
+  }
+  function satuDesimal(n){ return (Math.round(n*10)/10).toString().replace(".", ","); }
+
+  function kalimatSehat(){
+    var r=rentangSehat();
+    if(!(profil.tinggi>0)) return "";
+    return "Untuk tinggi "+profil.tinggi+" cm, rentang berat sehat menurut BMI sekitar "+
+      satuDesimal(r.bawah)+" sampai "+satuDesimal(r.atas)+" kg. Ini patokan kasar yang tidak membedakan otot dan lemak.";
   }
 
   function hitung(){
@@ -800,6 +879,84 @@
     }
   }
 
+
+  // Takaran porsi: hitungan sederhana, bukan penilaian atas makanannya
+
+  var PECAHAN = [
+    { r:3/4, teks:"dibagi 4 lalu dimakan 3 bagian", bagian:"tiga perempat" },
+    { r:2/3, teks:"dibagi 3 lalu dimakan 2 bagian", bagian:"dua pertiga" },
+    { r:1/2, teks:"dibagi 2 lalu dimakan 1 bagian", bagian:"setengah" },
+    { r:1/3, teks:"dibagi 3 lalu dimakan 1 bagian", bagian:"sepertiga" },
+    { r:1/4, teks:"dibagi 4 lalu dimakan 1 bagian", bagian:"seperempat" }
+  ];
+
+  function pecahanMuat(fraksi){
+    for(var i=0;i<PECAHAN.length;i++){
+      if(PECAHAN[i].r <= fraksi + 0.001) return PECAHAN[i];
+    }
+    return null;
+  }
+
+  function gramTeks(it, fraksi){
+    return it.gram ? " (sekitar "+Math.round(it.gram*it.porsi*fraksi)+" g)" : "";
+  }
+
+  function saranTakaran(daftar, sisa){
+    var total = daftar.reduce(function(a,b){ return a+b.kkal; },0);
+    if(total <= sisa || total <= 0) return "";
+
+    var besar = daftar[0], i;
+    for(i=1;i<daftar.length;i++){ if(daftar[i].kkal > besar.kkal) besar = daftar[i]; }
+
+    var kelebihan = total - sisa;
+    var boleh = besar.kkal - kelebihan;
+
+    // Kalau satu item terbesar saja cukup untuk menutup selisihnya
+    if(boleh > 0 && besar.kkal > 0){
+      var f = boleh / besar.kkal;
+      var pecah = pecahanMuat(f);
+      if(pecah) return "Kalau " + besar.nama + " " + pecah.teks +
+        gramTeks(besar, pecah.r) + ", sisanya pas dengan jatah hari ini.";
+      return "Kalau " + besar.nama + " dikurangi jadi sekitar " + Math.round(boleh) + " kkal" +
+        gramTeks(besar, f) + ", sisanya pas dengan jatah hari ini.";
+    }
+
+    // Selisihnya lebih besar dari satu item, jadi seluruh piring yang dikecilkan
+    if(sisa > 0){
+      var fs = sisa / total;
+      var pecahS = pecahanMuat(fs);
+      if(pecahS) return "Sekitar " + pecahS.bagian +
+        " dari isi piring ini muat di jatah hari ini, kalau semuanya dikurangi rata.";
+      return "Sisa jatah hari ini tinggal " + Math.round(sisa) + " kkal, jauh di bawah isi piring ini.";
+    }
+    return "";
+  }
+
+  function tulisCatatanScan(){
+    var el=$("catatanHasil");
+    if(!hasilFoto.length){ el.textContent=""; el.className="catatanScan"; return; }
+
+    var h=hitung();
+    var masuk=items.reduce(function(a,b){ return a+b.kkal; },0);
+    var sisa=h.target-masuk;
+    var total=hasilFoto.reduce(function(a,b){ return a+b.kkal; },0);
+    var persen = h.target>0 ? Math.round(total/h.target*100) : 0;
+
+    var pokok, saran="";
+    if(sisa<=0){
+      pokok = "Total <b>"+total+" kkal</b>, sekitar "+persen+" persen jatah harianmu. Jatah hari ini sudah terpakai habis sebelum makanan ini.";
+      el.className="catatanScan penuh";
+    } else if(total<=sisa){
+      pokok = "Total <b>"+total+" kkal</b>, sekitar "+persen+" persen jatah harianmu. Setelah dicatat, sisa <b>"+(sisa-total)+" kkal</b> untuk hari ini.";
+      el.className="catatanScan";
+    } else {
+      pokok = "Total <b>"+total+" kkal</b>, sekitar "+persen+" persen jatah harianmu. Sisa jatah hari ini tinggal <b>"+sisa+" kkal</b>.";
+      saran = saranTakaran(hasilFoto, sisa);
+      el.className="catatanScan penuh";
+    }
+    el.innerHTML = pokok + (saran ? '<span class="saran">'+saran+'</span>' : "");
+  }
+
   function gambarHasil(){
     var wadah=$("hasilItem"); wadah.innerHTML="";
     hasilFoto.forEach(function(it,i){
@@ -822,6 +979,7 @@
       lebih.setAttribute("aria-label","Tambah porsi");
       var gram=document.createElement("span"); gram.className="gram";
       var k=document.createElement("input"); k.className="kkalBox"; k.type="number"; k.inputMode="numeric"; k.min="0";
+      var ket=document.createElement("div"); ket.className="porsiKet";
 
       function segarkan(){
         var d=hasilFoto[i];
@@ -829,6 +987,9 @@
         d.kkal=Math.round(d.dasar*d.porsi);
         k.value=d.kkal;
         gram.textContent = d.gram ? "sekitar "+Math.round(d.gram*d.porsi)+" g" : "";
+        var t=hitung().target;
+        ket.textContent = t>0 ? d.kkal+" kkal, sekitar "+Math.round(d.kkal/t*100)+" persen jatah harian" : "";
+        tulisCatatanScan();
       }
       kurang.onclick=function(){ hasilFoto[i].porsi=Math.max(0.25,+(hasilFoto[i].porsi-0.25).toFixed(2)); segarkan(); };
       lebih.onclick=function(){ hasilFoto[i].porsi=+(hasilFoto[i].porsi+0.25).toFixed(2); segarkan(); };
@@ -841,10 +1002,11 @@
 
       porsi.appendChild(kurang); porsi.appendChild(nilai); porsi.appendChild(lebih);
       bawah.appendChild(porsi); bawah.appendChild(gram); bawah.appendChild(k);
-      blok.appendChild(atas); blok.appendChild(bawah);
+      blok.appendChild(atas); blok.appendChild(bawah); blok.appendChild(ket);
       wadah.appendChild(blok);
       segarkan();
     });
+    tulisCatatanScan();
     $("hasil").className = hasilFoto.length ? "hasil tampil" : "hasil";
   }
 
@@ -1011,8 +1173,8 @@
   $("btnHapusRiwayat").onclick=function(){ sering={}; simpanSemua(); render(); };
   $("btnHapusHari").onclick=function(){ items=[]; gerak=[]; simpanSemua(); render(); };
 
-  ["jk","usia","berat","tinggi","aktivitas","defisit"].forEach(function(id){
-    $(id).addEventListener("change",function(){ bacaProfil(); simpanSemua(); render(); ringkasProfil(); });
+  ["jk","usia","berat","tinggi","aktivitas","defisit","targetBerat"].forEach(function(id){
+    $(id).addEventListener("change",function(){ bacaProfil(); simpanSemua(); render(); ringkasProfil(); gambarTarget(); });
   });
 
 
@@ -1029,7 +1191,7 @@
       b.setAttribute("aria-selected", b.getAttribute("data-ke")===nama ? "true" : "false");
     });
     window.scrollTo(0,0);
-    if(nama==="riwayat") gambarRiwayat();
+    if(nama==="riwayat"){ gambarTarget(); gambarRiwayat(); }
     if(nama==="teman") gambarKartu();
   }
   Array.prototype.forEach.call(document.querySelectorAll('.tab button[data-ke]'), function(b){
@@ -1042,6 +1204,79 @@
   };
 
   // Riwayat dan grafik
+
+
+  function posisiSkala(berat){
+    var b = bmi(berat);
+    var v = (b - 15) / 20 * 100;
+    return Math.max(0, Math.min(100, v));
+  }
+
+  function gambarTarget(){
+    var r = rentangSehat();
+    var kini = profil.berat, tuju = profil.target;
+    var bKini = bmi(kini);
+
+    $("bmiKini").textContent = satuDesimal(bKini);
+    $("rentangSehat").textContent = satuDesimal(r.bawah)+" sampai "+satuDesimal(r.atas)+" kg";
+
+    var kiri = posisiSkala(beratDariBmi(18.5)), kanan = posisiSkala(beratDariBmi(24.9));
+    $("skalaSehat").style.left = kiri+"%";
+    $("skalaSehat").style.width = (kanan-kiri)+"%";
+    $("skalaKini").style.left = "calc("+posisiSkala(kini)+"% - 2px)";
+    $("skalaKiri").textContent = satuDesimal(beratDariBmi(15))+" kg";
+    $("skalaKanan").textContent = satuDesimal(beratDariBmi(35))+" kg";
+
+    var tandaTuju = $("skalaTuju");
+    if(tuju){
+      tandaTuju.style.display = "block";
+      tandaTuju.style.left = "calc("+posisiSkala(tuju)+"% - 2px)";
+    } else {
+      tandaTuju.style.display = "none";
+    }
+
+    if(!tuju){
+      $("targetAngka").textContent = satuDesimal(kini)+" kg sekarang";
+      var posisi = bKini < 18.5 ? "di bawah rentang sehat"
+        : (bKini > 24.9 ? "di atas rentang sehat" : "di dalam rentang sehat");
+      $("targetKet").textContent = "Beratmu "+posisi+". "+kalimatSehat();
+      $("targetTempo").textContent = "Isi berat yang kamu tuju di Saya, lalu Profil dan target, untuk melihat perkiraan waktunya.";
+      return;
+    }
+
+    var selisih = kini - tuju;
+    $("targetAngka").textContent = satuDesimal(Math.abs(selisih))+" kg lagi";
+    $("targetKet").textContent = selisih > 0
+      ? "Dari "+satuDesimal(kini)+" kg menuju "+satuDesimal(tuju)+" kg."
+      : (selisih < 0
+        ? "Targetmu "+satuDesimal(tuju)+" kg, lebih berat dari sekarang. Aplikasi ini menghitung defisit, jadi bagian ini tidak bisa memperkirakan waktunya."
+        : "Kamu sudah di berat yang kamu tuju.");
+
+    var pesanTempo = "";
+    if(Math.abs(selisih) < 0.1){
+      pesanTempo = "Target tercapai. Kalau mau menjaganya, ganti kecepatan turun berat jadi Jaga berat saat ini.";
+    } else if(selisih < 0){
+      pesanTempo = "";
+    } else {
+      var h = hitung();
+      if(h.potong <= 0){
+        pesanTempo = "Kecepatan turun berat masih diatur ke Jaga berat saat ini, jadi target ini tidak akan tercapai. Ubah di Profil dan target.";
+      } else {
+        var hari = Math.ceil(selisih * KKAL_PER_KG / h.potong);
+        var sampai = new Date();
+        sampai.setDate(sampai.getDate() + hari);
+        var minggu = Math.round(hari/7);
+        pesanTempo = "Dengan defisit "+h.potong+" kkal per hari, perkiraan sekitar "+
+          (minggu >= 2 ? minggu+" minggu" : hari+" hari")+", yaitu sekitar "+
+          sampai.toLocaleDateString("id-ID",{ day:"numeric", month:"long", year:"numeric" })+
+          ". Ini hitungan kasar dan hanya berlaku kalau catatanmu rapat.";
+      }
+      if(tuju < r.bawah){
+        pesanTempo += " Targetmu di bawah rentang sehat untuk tinggimu. Sebaiknya bicarakan dulu dengan dokter atau ahli gizi.";
+      }
+    }
+    $("targetTempo").textContent = pesanTempo;
+  }
 
   function gambarRiwayat(){
     var kunciHari=Object.keys(riwayat).sort(urutTanggal);
@@ -1117,7 +1352,7 @@
     riwayat[hariIni].berat=b;
     simpan.set("dk_riwayat", JSON.stringify(riwayat));
     $("beratHari").value="";
-    render(); gambarRiwayat();
+    render(); gambarRiwayat(); gambarTarget(); ringkasProfil();
   };
 
   // Kartu untuk dibagikan
@@ -1234,6 +1469,7 @@
   $("btnBalik").onclick=tutupSub;
 
   function ringkasProfil(){
+    $("sehatProfil").textContent = kalimatSehat();
     var h=hitung();
     $("ringkasProfil").textContent = profil.jk.charAt(0).toUpperCase()+profil.jk.slice(1)+
       ", "+profil.usia+" tahun, "+profil.berat+" kg, "+profil.tinggi+" cm. "+
@@ -1256,12 +1492,12 @@
     this.removeAttribute("data-yakin");
     this.textContent="Hapus semua data termasuk riwayat";
     p.textContent="Semua data sudah dihapus.";
-    muat(); render(); ringkasProfil();
+    muat(); render(); ringkasProfil(); gambarTarget();
   };
 
   $("tanggal").textContent=new Date().toLocaleDateString("id-ID",{ weekday:"long", day:"numeric", month:"long" });
 
-  muat(); render();
+  muat(); render(); gambarTarget();
   if(!simpan.get("dk_profil")){ keTab("saya"); bukaSub("profil"); }
   ringkasProfil();
   if(kunci && !model) muatModel();

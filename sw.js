@@ -1,6 +1,6 @@
 // Service worker: aplikasi tetap bisa dibuka tanpa internet,
 // tapi saat ada internet semua berkas diambil versi terbarunya lebih dulu.
-var VERSI = "snapeat-v3";
+var VERSI = "snapeat-v4";
 var BERKAS = ["./", "./index.html", "./manifest.webmanifest", "./ikon-192.png", "./ikon-512.png", "./ikon-maskable.png",
   "./tab-hari.png", "./tab-riwayat.png", "./tab-foto.png", "./tab-teman.png", "./tab-saya.png"];
 
